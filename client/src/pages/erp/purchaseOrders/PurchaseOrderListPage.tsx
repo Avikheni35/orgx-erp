@@ -1,0 +1,119 @@
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import {
+  Box, Typography, Stack, Button, Table, TableHead, TableBody, TableRow,
+  TableCell, CircularProgress, Alert, Chip, Select, MenuItem, FormControl, InputLabel,
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { useTranslation } from 'react-i18next';
+import { purchaseOrdersApi, type PurchaseOrderStatus } from '../../../api/purchaseOrders';
+
+function fmtCents(cents: number, locale: string) {
+  return (cents / 100).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+
+const STATUS_COLOR: Record<PurchaseOrderStatus, 'default' | 'info' | 'warning' | 'success' | 'error'> = {
+  draft:              'default',
+  sent:               'info',
+  partially_received: 'warning',
+  received:           'success',
+  cancelled:          'error',
+};
+
+export default function PurchaseOrderListPage() {
+  const { i18n } = useTranslation();
+  const de       = i18n.language === 'de';
+  const locale   = de ? 'de-DE' : 'en-GB';
+  const navigate = useNavigate();
+
+  const [statusFilter, setStatus] = useState('');
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['purchase-orders', statusFilter],
+    queryFn:  () => purchaseOrdersApi.list({ status: statusFilter || undefined }),
+  });
+  const orders = data?.data?.orders ?? [];
+
+  const STATUS_LABEL: Record<PurchaseOrderStatus, string> = {
+    draft:              de ? 'Entwurf'            : 'Draft',
+    sent:               de ? 'Gesendet'           : 'Sent',
+    partially_received: de ? 'Teilweise erhalten' : 'Partially received',
+    received:           de ? 'Vollständig erhalten' : 'Received',
+    cancelled:          de ? 'Storniert'          : 'Cancelled',
+  };
+
+  return (
+    <Box>
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={3}>
+        <Box>
+          <Typography variant="h5" fontWeight={700}>{de ? 'Bestellungen' : 'Purchase Orders'}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {de ? 'Einkaufsbestellungen an Lieferanten' : 'Purchase orders sent to suppliers'}
+          </Typography>
+        </Box>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/erp/einkauf/bestellungen/new')}>
+          {de ? 'Neue Bestellung' : 'New order'}
+        </Button>
+      </Stack>
+
+      <Stack direction="row" gap={2} mb={2}>
+        <FormControl size="small" sx={{ minWidth: 200 }}>
+          <InputLabel>{de ? 'Status' : 'Status'}</InputLabel>
+          <Select value={statusFilter} label="Status" onChange={e => setStatus(e.target.value)}>
+            <MenuItem value="">{de ? 'Alle' : 'All'}</MenuItem>
+            {(Object.keys(STATUS_LABEL) as PurchaseOrderStatus[]).map(s => (
+              <MenuItem key={s} value={s}>{STATUS_LABEL[s]}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Stack>
+
+      {isLoading && <Box display="flex" justifyContent="center" mt={6}><CircularProgress /></Box>}
+      {isError   && <Alert severity="error">{de ? 'Fehler beim Laden.' : 'Failed to load.'}</Alert>}
+
+      {!isLoading && !isError && (
+        <Box sx={{ overflowX: 'auto' }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>{de ? 'Bestellnr.' : 'PO No.'}</TableCell>
+                <TableCell>{de ? 'Lieferant' : 'Supplier'}</TableCell>
+                <TableCell>{de ? 'Bestelldatum' : 'Order date'}</TableCell>
+                <TableCell>{de ? 'Erwartet am' : 'Expected'}</TableCell>
+                <TableCell>{de ? 'Status' : 'Status'}</TableCell>
+                <TableCell align="right">{de ? 'Betrag (brutto)' : 'Total (gross)'}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {orders.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 4, color: 'text.disabled' }}>
+                    {de ? 'Keine Bestellungen gefunden.' : 'No purchase orders found.'}
+                  </TableCell>
+                </TableRow>
+              )}
+              {orders.map(o => (
+                <TableRow key={o._id} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/erp/einkauf/bestellungen/${o._id}`)}>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{o.poNumber}</TableCell>
+                  <TableCell><Typography variant="body2" fontWeight={500}>{o.supplierName}</Typography></TableCell>
+                  <TableCell>{new Date(o.orderDate).toLocaleDateString(locale)}</TableCell>
+                  <TableCell>{o.expectedDeliveryDate ? new Date(o.expectedDeliveryDate).toLocaleDateString(locale) : '—'}</TableCell>
+                  <TableCell>
+                    <Chip size="small" label={STATUS_LABEL[o.status]} color={STATUS_COLOR[o.status]} />
+                    {o.convertedToVendorInvoiceId && (
+                      <Chip size="small" variant="outlined" label={de ? 'Umgewandelt' : 'Converted'} sx={{ ml: 0.5 }} />
+                    )}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
+                    {fmtCents(o.totalCents, locale)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
+      )}
+    </Box>
+  );
+}
