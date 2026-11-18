@@ -41,7 +41,9 @@ async function seed() {
 
   // ── USERS ───────────────────────────────────────────────────────────────────
   const adminId = OID();
-  const pw = await bcrypt.hash('Erp1234!', 12);
+  const erpPw   = process.env.SEED_ERP_PASSWORD   ?? 'Erp1234!';
+  const kassePw = process.env.SEED_KASSE_PASSWORD ?? 'Kasse1234!';
+  const pw = await bcrypt.hash(erpPw, 12);
   await db.collection('users').insertMany([
     {
       _id: adminId, tenantId, email: 'admin@erp.demo', passwordHash: pw,
@@ -69,7 +71,7 @@ async function seed() {
     },
     {
       _id: OID(), tenantId, email: 'kassierer@erp.demo',
-      passwordHash: await bcrypt.hash('Kasse1234!', 12),
+      passwordHash: await bcrypt.hash(kassePw, 12),
       role: 'erp_employee', firstName: 'Kassa', lastName: 'Mitarbeiter', status: 'active',
       emailVerified: true, twoFactorEnabled: false, failedLoginAttempts: 0,
       refreshTokenHashes: [], language: 'de',
@@ -687,10 +689,10 @@ async function seed() {
   console.log('  M3 ERP — Seed Complete (Meridian Consulting GmbH)');
   console.log('══════════════════════════════════════════════');
   console.log('  Tenant code:    demo');
-  console.log('  Admin:          admin@erp.demo / Erp1234!');
-  console.log('  Accountant:     accountant@erp.demo / Erp1234!');
-  console.log('  Viewer:         viewer@erp.demo / Erp1234!');
-  console.log('  Employee (POS): kassierer@erp.demo / Kasse1234!');
+  console.log(`  Admin:          admin@erp.demo / ${erpPw}`);
+  console.log(`  Accountant:     accountant@erp.demo / ${erpPw}`);
+  console.log(`  Viewer:         viewer@erp.demo / ${erpPw}`);
+  console.log(`  Employee (POS): kassierer@erp.demo / ${kassePw}`);
   console.log('──────────────────────────────────────────────');
   console.log(`  Accounts:       ${accounts.length}`);
   console.log(`  Customers:      5`);

@@ -20,8 +20,14 @@ app.use(helmet({
   hsts: env.NODE_ENV === 'production'
     ? { maxAge: 31536000, includeSubDomains: true, preload: true }
     : false,
+  contentSecurityPolicy: {
+    directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] },
+  },
 }));
 app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
+
+const credentialLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30 });
+app.use('/api/auth/login', credentialLimiter);
 
 if (env.NODE_ENV === 'production') {
   app.use(
@@ -33,8 +39,6 @@ if (env.NODE_ENV === 'production') {
       legacyHeaders: false,
     })
   );
-  const credentialLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30 });
-  app.use('/api/auth/login', credentialLimiter);
 }
 
 app.use(express.json({ limit: '10mb' }));
@@ -48,7 +52,7 @@ if (env.NODE_ENV !== 'test') {
 app.use('/api', apiRoutes);
 
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', module: 'm3', env: env.NODE_ENV, version: '0.1.0' });
+  res.json({ status: 'ok', module: 'm3', version: '0.1.0' });
 });
 
 app.use((_req, res) => {

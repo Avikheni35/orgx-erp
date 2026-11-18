@@ -34,12 +34,14 @@ async function seed() {
 
   const tenantId = tenant!._id;
 
+  const erpPw    = process.env.SEED_ERP_PASSWORD   ?? 'Erp1234!';
+  const kassePw  = process.env.SEED_KASSE_PASSWORD ?? 'Kasse1234!';
   const erp_users = [
-    { email: 'admin@erp.demo',          password: 'Erp1234!',     role: 'erp_admin',      firstName: 'ERP',       lastName: 'Admin' },
-    { email: 'buchhalter@erp.demo',     password: 'Buch1234!',    role: 'erp_accountant', firstName: 'Max',       lastName: 'Buchhalter' },
-    { email: 'viewer@erp.demo',         password: 'View1234!',    role: 'erp_viewer',     firstName: 'Leser',     lastName: 'Viewer' },
-    { email: 'steuerberater@erp.demo',  password: 'Steuer1234!',  role: 'erp_tax_advisor',firstName: 'Steuer',    lastName: 'Berater' },
-    { email: 'kassierer@erp.demo',      password: 'Kasse1234!',   role: 'erp_employee',   firstName: 'Kassa',     lastName: 'Mitarbeiter' },
+    { email: 'admin@erp.demo',          password: erpPw,          role: 'erp_admin',      firstName: 'ERP',       lastName: 'Admin' },
+    { email: 'buchhalter@erp.demo',     password: erpPw,          role: 'erp_accountant', firstName: 'Max',       lastName: 'Buchhalter' },
+    { email: 'viewer@erp.demo',         password: erpPw,          role: 'erp_viewer',     firstName: 'Leser',     lastName: 'Viewer' },
+    { email: 'steuerberater@erp.demo',  password: erpPw,          role: 'erp_tax_advisor',firstName: 'Steuer',    lastName: 'Berater' },
+    { email: 'kassierer@erp.demo',      password: kassePw,        role: 'erp_employee',   firstName: 'Kassa',     lastName: 'Mitarbeiter' },
   ];
 
   for (const u of erp_users) {
@@ -71,11 +73,11 @@ async function seed() {
 
   console.log('\n[M3 Seed] Done!');
   console.log('  Tenant code: demo');
-  console.log('  ERP Admin:   admin@erp.demo / Erp1234!');
-  console.log('  Accountant:  buchhalter@erp.demo / Buch1234!');
-  console.log('  Viewer:      viewer@erp.demo / View1234!');
-  console.log('  Tax Advisor: steuerberater@erp.demo / Steuer1234!');
-  console.log('  Employee:    kassierer@erp.demo / Kasse1234!');
+  console.log(`  ERP Admin:   admin@erp.demo / ${erpPw}`);
+  console.log(`  Accountant:  buchhalter@erp.demo / ${erpPw}`);
+  console.log(`  Viewer:      viewer@erp.demo / ${erpPw}`);
+  console.log(`  Tax Advisor: steuerberater@erp.demo / ${erpPw}`);
+  console.log(`  Employee:    kassierer@erp.demo / ${kassePw}`);
 
   await mongoose.disconnect();
 }
