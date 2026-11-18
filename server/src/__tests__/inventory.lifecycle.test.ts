@@ -128,7 +128,7 @@ describe('postSalesInvoice → ServiceItem stock decrement', () => {
 
 // ── reverseSalesInvoiceInventory — ServiceItem stock restore ──────────────────
 describe('reverseSalesInvoiceInventory → ServiceItem stock restore', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('restores ServiceItem stock by the sold quantity', async () => {
     const existingMovement = {
@@ -186,7 +186,7 @@ describe('reverseSalesInvoiceInventory → ServiceItem stock restore', () => {
 
 // ── reverseSalesInvoiceInventory — Product stock restore ──────────────────────
 describe('reverseSalesInvoiceInventory → Product stock restore', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('restores Product stock when movement has no variant', async () => {
     const existingMovement = {

@@ -148,7 +148,7 @@ describe('postSalesInvoice — SKR03 double-entry', () => {
     await postSalesInvoice(inv as never, USER);
 
     const [createCall] = mockJE.create.mock.calls;
-    const lines = createCall[0].lines as { accountNumber: string; debit: number; credit: number }[];
+    const lines = (createCall[0] as any).lines as { accountNumber: string; debit: number; credit: number }[];
     const arLine = lines.find(l => l.accountNumber === SKR03.AR);
     expect(arLine).toBeDefined();
     expect(arLine!.debit).toBeCloseTo(119, 1);   // €119 gross
@@ -159,7 +159,7 @@ describe('postSalesInvoice — SKR03 double-entry', () => {
     const inv = makeSalesInvoice();
     await postSalesInvoice(inv as never, USER);
 
-    const lines = mockJE.create.mock.calls[0][0].lines as { accountNumber: string; credit: number }[];
+    const lines = (mockJE.create.mock.calls[0][0] as any).lines as { accountNumber: string; credit: number }[];
     const revLine = lines.find(l => l.accountNumber === SKR03.REVENUE_19);
     expect(revLine).toBeDefined();
     expect(revLine!.credit).toBeCloseTo(100, 1);  // €100 net
@@ -169,7 +169,7 @@ describe('postSalesInvoice — SKR03 double-entry', () => {
     const inv = makeSalesInvoice();
     await postSalesInvoice(inv as never, USER);
 
-    const lines = mockJE.create.mock.calls[0][0].lines as { accountNumber: string; credit: number }[];
+    const lines = (mockJE.create.mock.calls[0][0] as any).lines as { accountNumber: string; credit: number }[];
     const vatLine = lines.find(l => l.accountNumber === SKR03.USTEUER_19);
     expect(vatLine).toBeDefined();
     expect(vatLine!.credit).toBeCloseTo(19, 1);   // €19 VAT
@@ -179,7 +179,7 @@ describe('postSalesInvoice — SKR03 double-entry', () => {
     const inv = makeSalesInvoice();
     await postSalesInvoice(inv as never, USER);
 
-    const lines = mockJE.create.mock.calls[0][0].lines as { debit: number; credit: number }[];
+    const lines = (mockJE.create.mock.calls[0][0] as any).lines as { debit: number; credit: number }[];
     const totalDebit  = lines.reduce((s, l) => s + l.debit, 0);
     const totalCredit = lines.reduce((s, l) => s + l.credit, 0);
     expect(totalDebit).toBeCloseTo(totalCredit, 5);
@@ -199,7 +199,7 @@ describe('postSalesInvoice — SKR03 double-entry', () => {
     });
     await postSalesInvoice(inv as never, USER);
 
-    const lines = mockJE.create.mock.calls[0][0].lines as { accountNumber: string }[];
+    const lines = (mockJE.create.mock.calls[0][0] as any).lines as { accountNumber: string }[];
     const accountNumbers = lines.map(l => l.accountNumber);
     expect(accountNumbers).toContain(SKR03.REVENUE_7);
     expect(accountNumbers).toContain(SKR03.USTEUER_7);
@@ -209,7 +209,7 @@ describe('postSalesInvoice — SKR03 double-entry', () => {
     const inv = makeSalesInvoice();
     await postSalesInvoice(inv as never, USER);
 
-    const entry = mockJE.create.mock.calls[0][0];
+    const entry = mockJE.create.mock.calls[0][0] as any;
     expect(entry.gobdHash).toBe('mock-hash');
   });
 });
@@ -227,7 +227,7 @@ describe('postVendorInvoice — SKR03 double-entry', () => {
     const inv = makeVendorInvoice();
     await postVendorInvoice(inv as never, USER);
 
-    const lines = mockJE.create.mock.calls[0][0].lines as { accountNumber: string; credit: number }[];
+    const lines = (mockJE.create.mock.calls[0][0] as any).lines as { accountNumber: string; credit: number }[];
     const apLine = lines.find(l => l.accountNumber === SKR03.AP);
     expect(apLine).toBeDefined();
     expect(apLine!.credit).toBeCloseTo(119, 1);
@@ -237,7 +237,7 @@ describe('postVendorInvoice — SKR03 double-entry', () => {
     const inv = makeVendorInvoice();
     await postVendorInvoice(inv as never, USER);
 
-    const lines = mockJE.create.mock.calls[0][0].lines as { accountNumber: string; debit: number }[];
+    const lines = (mockJE.create.mock.calls[0][0] as any).lines as { accountNumber: string; debit: number }[];
     const vstLine = lines.find(l => l.accountNumber === SKR03.VORSTEUER_19);
     expect(vstLine).toBeDefined();
     expect(vstLine!.debit).toBeCloseTo(19, 1);
@@ -247,7 +247,7 @@ describe('postVendorInvoice — SKR03 double-entry', () => {
     const inv = makeVendorInvoice();
     await postVendorInvoice(inv as never, USER);
 
-    const lines = mockJE.create.mock.calls[0][0].lines as { accountNumber: string; debit: number }[];
+    const lines = (mockJE.create.mock.calls[0][0] as any).lines as { accountNumber: string; debit: number }[];
     const expLine = lines.find(l => l.accountNumber === '4200');
     expect(expLine).toBeDefined();
     expect(expLine!.debit).toBeCloseTo(100, 1);
@@ -267,7 +267,7 @@ describe('postVendorInvoice — SKR03 double-entry', () => {
     });
     await postVendorInvoice(inv as never, USER);
 
-    const lines = mockJE.create.mock.calls[0][0].lines as { accountNumber: string }[];
+    const lines = (mockJE.create.mock.calls[0][0] as any).lines as { accountNumber: string }[];
     expect(lines.map(l => l.accountNumber)).toContain('4980');
     expect(lines.map(l => l.accountNumber)).not.toContain('4200');
   });
@@ -276,7 +276,7 @@ describe('postVendorInvoice — SKR03 double-entry', () => {
     const inv = makeVendorInvoice();
     await postVendorInvoice(inv as never, USER);
 
-    const lines = mockJE.create.mock.calls[0][0].lines as { debit: number; credit: number }[];
+    const lines = (mockJE.create.mock.calls[0][0] as any).lines as { debit: number; credit: number }[];
     const td = lines.reduce((s, l) => s + l.debit, 0);
     const tc = lines.reduce((s, l) => s + l.credit, 0);
     expect(td).toBeCloseTo(tc, 5);
@@ -294,7 +294,7 @@ describe('postSalesInvoicePayment — payment clears AR', () => {
     const inv = makeSalesInvoice();
     await postSalesInvoicePayment(inv as never, USER, '1200');
 
-    const lines = mockJE.create.mock.calls[0][0].lines as { accountNumber: string; debit: number; credit: number }[];
+    const lines = (mockJE.create.mock.calls[0][0] as any).lines as { accountNumber: string; debit: number; credit: number }[];
     const bankLine = lines.find(l => l.accountNumber === '1200');
     const arLine   = lines.find(l => l.accountNumber === SKR03.AR);
     expect(bankLine?.debit).toBeCloseTo(119, 1);
@@ -338,7 +338,7 @@ describe('postSalesReturn — reversal entry for POS returns', () => {
     });
     await postSalesReturn(returnInv as never, USER, '1000');
 
-    const lines = mockJE.create.mock.calls[0][0].lines as { accountNumber: string; debit: number; credit: number }[];
+    const lines = (mockJE.create.mock.calls[0][0] as any).lines as { accountNumber: string; debit: number; credit: number }[];
     const revLine  = lines.find(l => l.accountNumber === SKR03.REVENUE_19);
     const vatLine  = lines.find(l => l.accountNumber === SKR03.USTEUER_19);
     const cashLine = lines.find(l => l.accountNumber === '1000');
@@ -393,7 +393,7 @@ describe('reverseJournalEntry — debit/credit swap', () => {
     };
     await reverseJournalEntry(originalEntry as never, USER, 'Storno Test');
 
-    const reversalLines = mockJE.create.mock.calls[0][0].lines as { accountNumber: string; debit: number; credit: number }[];
+    const reversalLines = (mockJE.create.mock.calls[0][0] as any).lines as { accountNumber: string; debit: number; credit: number }[];
     const arReversal = reversalLines.find(l => l.accountNumber === '1400');
     expect(arReversal?.debit).toBe(0);      // was debit 119 → now credit
     expect(arReversal?.credit).toBe(119);
